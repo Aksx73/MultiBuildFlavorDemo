@@ -1,0 +1,89 @@
+plugins {
+    id 'com.android.application'
+    id 'org.jetbrains.kotlin.android'
+}
+
+android {
+    namespace 'com.android.multibuildflavor'
+    compileSdk 33
+
+    defaultConfig {
+        applicationId "com.android.multibuildflavor"
+        minSdk 24
+        targetSdk 33
+        versionCode 1
+        versionName "1.0"
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+
+        //For changing app bundle name (.aab file)
+        def dateFormat = new Date().format('ddMMYYYY')
+        setProperty("archivesBaseName", "BJSConnect" + "_v" + versionName + "(" + versionCode + ")_" + dateFormat)
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+        debug {
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
+    }
+
+    /**
+     * Format naming of .apk build with their
+     * @variantName , @versionName and @date
+     * */
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+            def variantName = variant.name
+            def versionName = variant.versionName
+            def formattedDate = new Date().format('ddMMYYYY')
+            outputFileName = "MyApp_${variantName}_v${versionName}_${formattedDate}.apk"
+        }
+    }
+
+    flavorDimensions "version"
+    productFlavors {
+        staging {
+            dimension "version"
+            buildConfigField "boolean", "IS_PRODUCTION", "false"
+            buildConfigField "String", "BASE_URL", "\"http://base.url.staging/\""
+            applicationIdSuffix ".staging"
+            versionNameSuffix "-staging"
+        }
+
+        production {
+            dimension "version"
+            buildConfigField "boolean", "IS_PRODUCTION", "true"
+            buildConfigField "String", "BASE_URL", "\"http://base.url.production/\""
+            //here no need to mention applicationIdSuffix since we want to use default value.
+        }
+    }
+
+    buildFeatures {
+        buildConfig = true
+        viewBinding = true
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
+}
+
+dependencies {
+
+    implementation 'androidx.core:core-ktx:1.8.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.5.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test.ext:junit:1.1.5'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
+}
